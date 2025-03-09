@@ -18,8 +18,7 @@ Decentralized Cross-border Digital Identity Attribute Correlation Classification
 
 ### 安装
 ```bash
-git clone https://github.com/your-username/your-repo.git
-cd your-repo
+git clone https://github.com/Kent919/cross-border-DID.git
 pip install -r requirements.txt
 ## REST API 接口
 
