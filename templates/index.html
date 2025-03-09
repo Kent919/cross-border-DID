@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨境身份属性数据生成</title>
+</head>
+
+<body>
+    <button id="generateButton">生成跨境身份属性数据</button>
+    <p id="message"></p>
+
+    <script>
+        const generateButton = document.getElementById('generateButton');
+        const message = document.getElementById('message');
+
+        generateButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/generate');
+                const data = await response.text();
+                message.textContent = data;
+            } catch (error) {
+                message.textContent = '发生错误，请稍后重试';
+            }
+        });
+    </script>
+</body>
+
+</html>

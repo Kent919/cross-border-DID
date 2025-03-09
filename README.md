@@ -8,7 +8,7 @@ Decentralized Cross-border Digital Identity Attribute Correlation Classification
 基于动态熵权法和改进聚类算法的属性分类分级系统，支持跨境数字身份数据的隐私风险评估和保护策略生成。
 
 ## 功能特性
-
+- 生成数据
 - 动态权重计算（熵权法）
 - 改进的K-means聚类算法
 - 自适应分级阈值调整
