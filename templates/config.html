@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>参数配置</title>
+</head>
+
+<body>
+    <h1>参数配置</h1>
+    <form action="/save_config" method="post">
+        <table>
+            <thead>
+                <tr>
+                    <th>参数ID</th>
+                    <th>类型</th>
+                    <th>使用位置</th>
+                    <th>参数值</th>
+                    <th>参数描述</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for param in params %}
+                <tr>
+                    <td>{{ param.param_id }}</td>
+                    <td>{{ param.type }}</td>
+                    <td>{{ param.func_name }}</td>
+                    <td><input type="text" name="{{ param.param_id }}" value="{{ param.func_value }}"></td>
+                    <td>{{ param.param_desc }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <input type="submit" value="保存配置">
+    </form>
+</body>
+
+</html>
