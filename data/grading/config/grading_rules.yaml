@@ -1,0 +1,15 @@
+# data/config/grading_rules.yaml
+version: 1.0
+rules:
+  - category_id: 1
+    sensitivity_level: RT01
+    description: 个人身份信息
+  - category_id: 2
+    sensitivity_level: RT02
+    description: 财务信息
+  - category_id: 3
+    sensitivity_level: RT03
+    description: 健康信息
+ # - category_id: 4
+ #   sensitivity_level: RT04
+ #   description: 通用信息

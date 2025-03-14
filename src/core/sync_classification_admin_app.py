@@ -1,119 +1,109 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, redirect, url_for
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
 import shutil
+import subprocess
+import os
 
 # 定义路径
-BASE_DIR = Path(__file__).parent.parent.parent / "data"  # 指向项目根目录下的 data 目录
-ORIGINAL_DATA_DIR = BASE_DIR / "original_data"
-CLASSIFICATION_DIR = BASE_DIR / "classification"
-HISTORY_DIR = CLASSIFICATION_DIR / "history"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+GRADING_DIR = BASE_DIR / "grading"
+CONFIG_DIR = GRADING_DIR / "config"
 
+# 初始化 Flask 应用
 app = Flask(__name__)
 
-ADMIN_HTML = """
+# 根路由：重定向到分级管理页面
+@app.route('/')
+def index():
+    return redirect(url_for('grading_management'))
+
+# 分级管理页面
+@app.route('/grading')
+def grading_management():
+    # 加载分级数据
+    try:
+        grading_df = pd.read_csv(GRADING_DIR / "inital_grading.csv")
+    except FileNotFoundError:
+        grading_df = pd.DataFrame(columns=["attribute_code", "attribute_chinese", "sensitivity_level"])
+    
+    return render_template_string(GRADING_HTML, data=grading_df.to_dict('records'))
+
+# 分级生成接口
+@app.route('/generate_grading')
+def trigger_grading():
+    try:
+        # 动态构建 grading_generator.py 的路径
+        grading_generator_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),  # 当前文件所在目录
+            "../src/core/grading_generator.py"          # 相对路径
+        )
+        # 确保路径正确
+        if not os.path.exists(grading_generator_path):
+            raise FileNotFoundError(f"File not found: {grading_generator_path}")
+        
+        # 调用 grading_generator.py
+        subprocess.run(["python", grading_generator_path], check=True)
+        return redirect(url_for('grading_management'))
+    except subprocess.CalledProcessError as e:
+        return f"Error generating grading: {e}", 500
+    except FileNotFoundError as e:
+        return f"File not found: {e}", 500
+
+# 分级管理页面模板
+GRADING_HTML = """
 <!DOCTYPE html>
 <html>
 <head>
-    <title>分类管理后台</title>
+    <title>专家分级管理</title>
     <style>
-        table { border-collapse: collapse; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        .history { margin-top: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        button { margin-bottom: 20px; padding: 10px 20px; font-size: 16px; }
     </style>
 </head>
 <body>
-    <h1>属性分类管理</h1>
-    
-    <form method="post">
+    <h1>专家分级管理</h1>
+    <button onclick="generateGrading()">生成初始分级</button>
     <table>
-        <tr><th>属性代码</th><th>属性名称</th><th>当前分类</th><th>新分类</th></tr>
-        {% for item in attributes %}
+        <tr>
+            <th>属性代码</th>
+            <th>属性名称</th>
+            <th>敏感级别</th>
+        </tr>
+        {% for item in data %}
         <tr>
             <td>{{ item.attribute_code }}</td>
             <td>{{ item.attribute_chinese }}</td>
-            <td>{{ item.category_name }}</td>
-            <td>
-                <select name="{{ item.attribute_code }}">
-                    {% for cat in categories %}
-                    <option value="{{ cat.category_id }}" 
-                        {% if cat.category_id == item.category_id %}selected{% endif %}>
-                        {{ cat.category_name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </td>
+            <td>{{ item.sensitivity_level }}</td>
         </tr>
         {% endfor %}
     </table>
-    <button type="submit">保存修改</button>
-    </form>
-
-    <div class="history">
-        <h3>最近变更</h3>
-        {{ change_log|safe }}
-    </div>
+    <script>
+    function generateGrading() {
+        fetch('/generate_grading')
+        .then(response => {
+            if (response.ok) {
+                alert('分级已生成，页面即将刷新');
+                window.location.reload();
+            } else {
+                alert('分级生成失败');
+            }
+        })
+        .catch(err => console.error(err));
+    }
+    </script>
 </body>
 </html>
 """
 
-def backup_current_version():
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    detail_path = CLASSIFICATION_DIR / "attribute_category_detail.csv"
-    backup_path = HISTORY_DIR / f"detail_{timestamp}.csv"
-    shutil.copy2(detail_path, backup_path)
-    return backup_path.name
-
-def log_change(action_type, changed_by="system", backup_file=None):
-    log_entry = {
-        "timestamp": datetime.now().isoformat(),
-        "action_type": action_type,
-        "changed_by": changed_by,
-        "backup_file": backup_file
-    }
-    
-    log_path = HISTORY_DIR / "changelog.csv"
-    pd.DataFrame([log_entry]).to_csv(log_path, mode='a', header=not log_path.exists(), index=False)
-
-@app.route('/', methods=['GET', 'POST'])
-def manage_classification():
-    # 加载数据
-    master = pd.read_csv(CLASSIFICATION_DIR / "attribute_category_master.csv")
-    detail = pd.read_csv(CLASSIFICATION_DIR / "attribute_category_detail.csv")
-    cross = pd.read_csv(ORIGINAL_DATA_DIR / "cross_attributes.csv")
-    
-    # 合并数据
-    df = cross.merge(detail, on='attribute_code').merge(master, on='category_id')
-    
-    # 处理修改
-    if request.method == 'POST':
-        updates = {}
-        for code, cat_id in request.form.items():
-            updates[code] = int(cat_id)
-        
-        # 应用修改
-        for code, new_cat in updates.items():
-            detail.loc[detail['attribute_code'] == code, 'category_id'] = new_cat
-        
-        # 备份和保存
-        backup_file = backup_current_version()
-        detail.to_csv(CLASSIFICATION_DIR / "attribute_category_detail.csv", index=False)
-        
-        # 记录日志
-        log_change("manual_edit", changed_by="admin", backup_file=backup_file)
-    
-    # 加载变更日志
-    try:
-        change_log = pd.read_csv(HISTORY_DIR / "changelog.csv").tail(5).to_html()
-    except FileNotFoundError:
-        change_log = "无历史记录"
-    
-    return render_template_string(ADMIN_HTML,
-        attributes=df.to_dict('records'),
-        categories=master.to_dict('records'),
-        change_log=change_log
-    )
-
 if __name__ == "__main__":
-    app.run(port=5001)
+    # 确保目录存在
+    GRADING_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    (GRADING_DIR / "history").mkdir(parents=True, exist_ok=True)
+    
+    # 启动 Flask 应用
+    app.run(port=5001, debug=True)
