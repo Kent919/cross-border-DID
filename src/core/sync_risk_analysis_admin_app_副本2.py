@@ -89,7 +89,7 @@ def risk_analysis():
 
         # 保存结果
         print("[7/8] 保存结果...")
-        output_cols = ['attribute_code', 'attribute_chinese', 'sensitivity_level', 'category_id', 'P_risk', 'R', 'H']  # 修改处：增加 category_id
+        output_cols = ['attribute_code', 'attribute_chinese', 'sensitivity_level', 'P_risk', 'R', 'H']
         # 检查 merged 数据框中是否包含所有输出列
         available_cols = merged.columns.tolist()
         missing_cols = [col for col in output_cols if col not in available_cols]
@@ -249,7 +249,6 @@ GRADING_HTML = """
                 <tr>
                     <th>属性代码</th>
                     <th>属性名称</th>
-                    <th>类别ID</th>  <!-- 新增列 -->
                     <th>敏感级别</th>
                     <th>风险概率</th>
                     <th>关联强度</th>
@@ -259,7 +258,6 @@ GRADING_HTML = """
                 <tr>
                     <td>{{ item.attribute_code }}</td>
                     <td>{{ item.attribute_chinese }}</td>
-                    <td>{{ item.category_id }}</td>  <!-- 新增列 -->
                     <td>{{ item.sensitivity_level }}</td>
                     <td>{{ "%.4f"|format(item.P_risk) }}</td>
                     <td>{{ "%.2f"|format(item.R) }}</td>

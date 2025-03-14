@@ -100,10 +100,10 @@ data/
 主要功能
 
 分级生成：
-调用 grading_generator.py 生成初始分级数据 (inital_grading.csv)。
+调用grading_generator.py生成初始分级数据 (inital_grading.csv)。
 支持重新生成分级数据并覆盖现有数据。
 风险分析：
-基于贝叶斯网络模型计算风险概率 (P_risk)、关联强度 (R) 和条件熵 (H)。（调节risk_parameters和grading_rules）
+基于贝叶斯网络模型计算风险概率(P_risk)、关联强度(R)和条件熵(H)。（调节risk_parameters和grading_rules）
 结果保存到 risk_analysis.csv 文件中。
 管理界面：
 提供 Web 界面展示当前分级结果和风险分析结果。
@@ -117,3 +117,21 @@ pip install pgmpy==0.1.26 flask pandas numpy pyyaml scipy
 python src/core/grading_generator.py
 启动风险分析服务：
 python src/core/sync_risk_analysis_admin_app.py
+
+注意：关联强度R计算：代码里R是按category_id分组对P_risk进行标准化得到的。要是某个category_id组内的P_risk值都相同，那么该组的R就会是0。在初始化阶段，由于系统属性没有在根据不同法律实践去调节，而只量化了一个标准，根据公式ℛ(𝑡) = 𝑓(𝑃risk,其他動態因素)；因此属性中的同一分类的风险值是一样的。
+条件熵H计算：条件熵H是基于category_id分组计算的。如果某个category_id组内的sensitivity_level值都相同，那么该组的条件熵就是0。同上，同一组内的风险水平是一样的，因此条件熵也是0. 
+这两个值在不同法律体系中，对属性风险看法和判断认识不一致的情况下，R或H就会有差异。
+
+隐私风险量化模块说明
+在data/original_data/目录下放置cross_attributes_extended.csv文件（扩展数据）。是用来计算属性熵的特别参数。sensitivity_level_ext是一个0到1之间的数值表示专家评估的修正系数。
+运行python app_routes.py
+访问 http://127.0.0.1:5001/quantify
+量化结果会保存到data/grading/risk_quantification.csv文件中
+其中说明：
+1.多源熵计算
+原始熵 (H_base)：基于原始数据中的sensitivity_level计算。
+扩展熵 (H_ext)：基于sensitivity_level_ext的修正系数计算。
+综合熵 (H_combined)：通过加权平均结合H_base和H_ext，公式为：
+H_combined = 0.7 * H_base + 0.3 * H_ext
+2.动态权重分配
+权重计算基于熵值(H)、关联风险(R)和损害潜势(P_risk)。

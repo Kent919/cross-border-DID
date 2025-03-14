@@ -1,0 +1,4 @@
+jurisdiction_weights:
+  default: 0.1
+min_H: 0.01
+min_R: 0.05
