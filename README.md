@@ -135,3 +135,37 @@ python src/core/sync_risk_analysis_admin_app.py
 H_combined = 0.7 * H_base + 0.3 * H_ext
 2.动态权重分配
 权重计算基于熵值(H)、关联风险(R)和损害潜势(P_risk)。
+
+## 模块7：隐私保护措施管理系统
+依赖原系统生成的risk_quantification.csv文件
+### 启动步骤
+
+python src/core/protection_mapper.py
+
+http://localhost:5002/protection
+
+功能特性如下：
+
+1.动态阈值计算：
+初始阈值基于3σ原则自动计算
+支持手动调整阈值参数
+2.灵活措施配置：
+通过复选框选择各等级保护措施
+支持自定义措施组合
+3.数据持久化：
+配置自动保存为YAML文件
+结果输出为CSV文件
+以下参数可以自己按需要配置：
+theta_high: 1.25
+theta_mid: 0.85
+theta_low: 0.45
+measures:
+  high:
+  - 加密
+  - 脫敏
+  - 審計
+  mid:
+  - 加密
+  - 匿名化
+  low:
+  - 訪問控制
