@@ -1,0 +1,33 @@
+{
+  "identities": {
+    "macau_001": {
+      "public_key": "pub_key_123",
+      "verified": true,
+      "registration_time": "2025-03-15T17:53:48.296979"
+    },
+    "macau_driver_8899": {
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs2WuNdLZR0VHCTVGjwJV\nvqkNPlgkU8ARfNOvoQ0Baza9OsXApuNlc4zq7Z21X35fc8Il+oHJPNS3ATStpXhX\nZPHm/RJCGN8TX0Utg70CSZtWbtc/p/3XTWBgep5MlZygdYDc3moso4ElNuaPQm0w\nD9+LHOUIohGuJK9cglQ0ItUjfSU0bCwO93pB4H40Z1m3if7rFAafGiguzTtzpm7W\nBKnbFbb0e6IJxKsc9WQowJZvqHRHaUTopiiUnrG5OA8QBH/x6X+NpiFjF6cRndOH\nbEGyDY3e/jkzb6oGbGsJHuyQZvITYZMdQQzDDElvqdVXWJOY7Nbd7Xa50aw5LCEs\nqQIDAQAB\n-----END PUBLIC KEY-----",
+      "verified": true,
+      "registration_time": "2025-03-15T17:55:43.913032"
+    }
+  },
+  "transactions": [
+    {
+      "action": "REGISTER:macau_001",
+      "timestamp": "2025-03-15T17:53:48.296981"
+    },
+    {
+      "action": "VERIFY_SUCCESS:macau_001",
+      "timestamp": "2025-03-15T17:53:48.297193"
+    },
+    {
+      "action": "REGISTER:macau_driver_8899",
+      "timestamp": "2025-03-15T17:55:43.913065"
+    },
+    {
+      "action": "VERIFY_SUCCESS:macau_driver_8899",
+      "timestamp": "2025-03-15T17:55:43.913824"
+    }
+  ],
+  "last_updated": "2025-03-15T17:55:43.913831"
+}
